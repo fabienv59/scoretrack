@@ -1,0 +1,273 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../models/game_type.dart';
+import '../providers/pro_provider.dart';
+import '../theme.dart';
+
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isPro = ref.watch(proProvider).isPro;
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  RichText(
+                    text: const TextSpan(children: [
+                      TextSpan(
+                        text: 'Score',
+                        style: TextStyle(
+                            fontSize: 42,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.textPrimary,
+                            letterSpacing: -1),
+                      ),
+                      TextSpan(
+                        text: 'Track',
+                        style: TextStyle(
+                            fontSize: 42,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primary,
+                            letterSpacing: -1),
+                      ),
+                    ]),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'par VanByte — Choisissez un jeu',
+                    style:
+                        TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: GridView.builder(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.05,
+                ),
+                itemCount: GameType.values.length,
+                itemBuilder: (context, index) {
+                  final game = GameType.values[index];
+                  final isCustom = game == GameType.custom;
+                  return _GameCard(
+                    game: game,
+                    locked: isCustom && !isPro,
+                    onTap: () => _handleTap(context, ref, game, isPro),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handleTap(
+      BuildContext context, WidgetRef ref, GameType game, bool isPro) {
+    if (game == GameType.custom) {
+      if (isPro) {
+        context.push('/custom');
+      } else {
+        _showProDialog(context, ref);
+      }
+    } else {
+      context.push('/setup/${game.name}');
+    }
+  }
+
+  void _showProDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(
+          '🔒 Fonctionnalité Pro',
+          style: TextStyle(color: AppColors.textPrimary, fontSize: 20),
+          textAlign: TextAlign.center,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Créez des jeux avec un nom libre,\nde 2 à 4 équipes et vos propres règles.',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
+                border:
+                    Border.all(color: AppColors.primary.withOpacity(0.4)),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('⭐',
+                      style: TextStyle(fontSize: 24)),
+                  SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'ScoreTrack Pro',
+                        style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16),
+                      ),
+                      Text(
+                        '1,99 € / an',
+                        style: TextStyle(
+                            color: AppColors.accent, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Plus tard',
+                style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              ref.read(proProvider.notifier).purchasePro();
+              Navigator.pop(ctx);
+              context.push('/pro');
+            },
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(140, 48),
+            ),
+            child: const Text('Acheter'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GameCard extends StatelessWidget {
+  final GameType game;
+  final bool locked;
+  final VoidCallback onTap;
+
+  const _GameCard({
+    required this.game,
+    required this.locked,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: locked
+                ? AppColors.textSecondary.withOpacity(0.3)
+                : AppColors.primary.withOpacity(0.2),
+          ),
+        ),
+        child: Stack(
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _GameIcon(game: game),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    game.label,
+                    style: TextStyle(
+                      color: locked
+                          ? AppColors.textSecondary
+                          : AppColors.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  game.targetScore > 0
+                      ? 'Jusqu\'à ${game.targetScore} pts'
+                      : 'Score libre',
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+            if (locked)
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text('🔒',
+                      style: TextStyle(fontSize: 14)),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GameIcon extends StatelessWidget {
+  final GameType game;
+  const _GameIcon({required this.game});
+
+  @override
+  Widget build(BuildContext context) {
+    final asset = game.assetImage;
+    if (asset != null) {
+      return Image.asset(
+        asset,
+        width: 40,
+        height: 40,
+        errorBuilder: (context, error, stackTrace) =>
+            Text(game.emoji, style: const TextStyle(fontSize: 40)),
+      );
+    }
+    return Text(game.emoji, style: const TextStyle(fontSize: 44));
+  }
+}
