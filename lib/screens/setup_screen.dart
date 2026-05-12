@@ -43,6 +43,9 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
   }
 
   bool get _isMolkky => _gameType == GameType.molkky;
+  bool get _isVolleyball => _gameType == GameType.volleyball;
+  // Jeux avec règles fixes : pas de config manuelle du score limite
+  bool get _hasFixedRules => _isMolkky || _isVolleyball;
 
   int get _effectiveTarget =>
       int.tryParse(_targetController.text.trim()) ?? 0;
@@ -54,6 +57,15 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
     final name2 = _team2Controller.text.trim().isEmpty
         ? 'Équipe 2'
         : _team2Controller.text.trim();
+
+    if (_isVolleyball) {
+      // Volleyball : moteur dédié, on passe les noms en extra go_router
+      context.push(
+        '/game/volleyball',
+        extra: {'teamA': name1, 'teamB': name2},
+      );
+      return;
+    }
 
     ref.read(gameConfigProvider.notifier).setConfig(GameConfig(
           gameType: _gameType,
@@ -104,7 +116,8 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 labelText: 'Équipe 1',
                 prefixIcon: const Icon(Icons.person, color: AppColors.primary),
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear, color: AppColors.textSecondary, size: 18),
+                  icon: const Icon(Icons.clear,
+                      color: AppColors.textSecondary, size: 18),
                   onPressed: () => _team1Controller.clear(),
                 ),
               ),
@@ -136,9 +149,11 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
                 labelText: 'Équipe 2',
-                prefixIcon: const Icon(Icons.person_outline, color: AppColors.accent),
+                prefixIcon:
+                    const Icon(Icons.person_outline, color: AppColors.accent),
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear, color: AppColors.textSecondary, size: 18),
+                  icon: const Icon(Icons.clear,
+                      color: AppColors.textSecondary, size: 18),
                   onPressed: () => _team2Controller.clear(),
                 ),
               ),
@@ -147,52 +162,11 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
             _sectionLabel('CONFIGURATION'),
             const SizedBox(height: 12),
 
-            // Mölkky : règles fixes, pas de config manuelle
-            if (_isMolkky) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                      color: AppColors.primary.withOpacity(0.3)),
-                ),
-                child: const Column(
-                  children: [
-                    Row(children: [
-                      Text('🎯', style: TextStyle(fontSize: 16)),
-                      SizedBox(width: 8),
-                      Expanded(
-                          child: Text('Objectif : exactement 50 points',
-                              style: TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontSize: 13))),
-                    ]),
-                    SizedBox(height: 8),
-                    Row(children: [
-                      Text('↩️', style: TextStyle(fontSize: 16)),
-                      SizedBox(width: 8),
-                      Expanded(
-                          child: Text('Dépasser 50 → score retombe à 25',
-                              style: TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontSize: 13))),
-                    ]),
-                    SizedBox(height: 8),
-                    Row(children: [
-                      Text('❌', style: TextStyle(fontSize: 16)),
-                      SizedBox(width: 8),
-                      Expanded(
-                          child: Text('3 ratés consécutifs → élimination',
-                              style: TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontSize: 13))),
-                    ]),
-                  ],
-                ),
-              ),
+            // ── Jeux à règles fixes : carte d'info, pas de config manuelle ──
+            if (_hasFixedRules) ...[
+              _RulesCard(gameType: _gameType),
             ] else ...[
-              // Score limite
+              // ── Score limite ─────────────────────────────────────────────
               TextField(
                 controller: _targetController,
                 style: const TextStyle(color: AppColors.textPrimary),
@@ -204,13 +178,13 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                       Icon(Icons.flag_outlined, color: AppColors.accent),
                 ),
               ),
-              // Variantes fléchettes
+              // ── Variantes fléchettes ─────────────────────────────────────
               if (_gameType == GameType.darts) ...[
                 const SizedBox(height: 12),
                 const Text(
                   'Variante rapide',
-                  style:
-                      TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  style: TextStyle(
+                      color: AppColors.textSecondary, fontSize: 12),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -252,11 +226,11 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 ),
               ],
               const SizedBox(height: 24),
-              // Mode de comptage
+              // ── Mode de comptage ─────────────────────────────────────────
               const Text(
                 'Mode de comptage',
-                style:
-                    TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                style: TextStyle(
+                    color: AppColors.textSecondary, fontSize: 12),
               ),
               const SizedBox(height: 10),
               Row(
@@ -332,4 +306,65 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
           letterSpacing: 1.2,
         ),
       );
+}
+
+// ─── Carte de règles pour les jeux à moteur dédié ─────────────────────────────
+
+/// Affiche un résumé des règles fixes selon le jeu (Mölkky, Volleyball…).
+/// Remplace les champs de config quand le jeu a ses propres règles intégrées.
+class _RulesCard extends StatelessWidget {
+  final GameType gameType;
+
+  const _RulesCard({required this.gameType});
+
+  @override
+  Widget build(BuildContext context) {
+    final rules = _rulesFor(gameType);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+      ),
+      child: Column(
+        children: rules
+            .map((r) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(children: [
+                    Text(r.$1, style: const TextStyle(fontSize: 16)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        r.$2,
+                        style: const TextStyle(
+                            color: AppColors.textPrimary, fontSize: 13),
+                      ),
+                    ),
+                  ]),
+                ))
+            .toList(),
+      ),
+    );
+  }
+
+  /// Retourne la liste des règles (emoji, texte) selon le jeu.
+  List<(String, String)> _rulesFor(GameType type) {
+    switch (type) {
+      case GameType.volleyball:
+        return [
+          ('🏐', 'Best of 5 sets — 3 sets gagnants'),
+          ('🎯', 'Sets 1-4 : 25 pts minimum, 2 pts d\'écart'),
+          ('⚡', 'Set 5 (tie-break) : 15 pts, 2 pts d\'écart'),
+        ];
+      case GameType.molkky:
+        return [
+          ('🎯', 'Objectif : exactement 50 points'),
+          ('↩️', 'Dépasser 50 → score retombe à 25'),
+          ('❌', '3 ratés consécutifs → élimination'),
+        ];
+      default:
+        return [];
+    }
+  }
 }

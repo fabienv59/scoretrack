@@ -124,8 +124,7 @@ class HomeScreen extends ConsumerWidget {
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('⭐',
-                      style: TextStyle(fontSize: 24)),
+                  Text('⭐', style: TextStyle(fontSize: 24)),
                   SizedBox(width: 12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,13 +219,18 @@ class _GameCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  game.targetScore > 0
-                      ? 'Jusqu\'à ${game.targetScore} pts'
-                      : 'Score libre',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 11,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Text(
+                    // Utilise le subtitle défini dans GameType
+                    game.subtitle,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 10,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
