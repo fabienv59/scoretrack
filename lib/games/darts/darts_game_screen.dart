@@ -215,6 +215,9 @@ class _DartsGameScreenState extends ConsumerState<DartsGameScreen> {
             score1: state.players[0].score,
             score2: state.players[1].score,
             playedAt: DateTime.now(),
+            winnerName: state.winnerId != null
+                ? state.players[state.winnerId!].name
+                : null,
           ));
     }
     await _checkAndRequestReview();

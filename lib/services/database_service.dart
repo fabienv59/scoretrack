@@ -18,7 +18,7 @@ class DatabaseService {
     final path = join(dbPath, 'scoretrack.db');
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE matches (
@@ -28,9 +28,17 @@ class DatabaseService {
             team2_name TEXT NOT NULL,
             score1 INTEGER NOT NULL,
             score2 INTEGER NOT NULL,
-            played_at INTEGER NOT NULL
+            played_at INTEGER NOT NULL,
+            winner_name TEXT
           )
         ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(
+            'ALTER TABLE matches ADD COLUMN winner_name TEXT',
+          );
+        }
       },
     );
   }

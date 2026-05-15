@@ -6,6 +6,8 @@ class MatchRecord {
   final int score1;
   final int score2;
   final DateTime playedAt;
+  // Null = draw. Explicit so countdown games (501/301) are handled correctly.
+  final String? winnerName;
 
   const MatchRecord({
     this.id,
@@ -15,9 +17,11 @@ class MatchRecord {
     required this.score1,
     required this.score2,
     required this.playedAt,
+    this.winnerName,
   });
 
   String? get winner {
+    if (winnerName != null) return winnerName;
     if (score1 > score2) return team1Name;
     if (score2 > score1) return team2Name;
     return null;
@@ -32,6 +36,7 @@ class MatchRecord {
         score2: map['score2'] as int,
         playedAt:
             DateTime.fromMillisecondsSinceEpoch(map['played_at'] as int),
+        winnerName: map['winner_name'] as String?,
       );
 
   Map<String, dynamic> toMap() => {
@@ -42,5 +47,6 @@ class MatchRecord {
         'score1': score1,
         'score2': score2,
         'played_at': playedAt.millisecondsSinceEpoch,
+        'winner_name': winnerName,
       };
 }
