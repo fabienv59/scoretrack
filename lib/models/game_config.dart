@@ -1,4 +1,5 @@
 import 'count_mode.dart';
+import 'darts_variant.dart';
 import 'game_type.dart';
 
 class GameConfig {
@@ -7,6 +8,8 @@ class GameConfig {
   final int targetScore; // 0 = score libre
   final CountMode countMode;
   final String? customLabel; // nom libre pour les jeux personnalisés
+  final DartsVariant? dartsVariant;
+  final int dartsRounds; // pour countUp
 
   const GameConfig({
     required this.gameType,
@@ -14,6 +17,8 @@ class GameConfig {
     required this.targetScore,
     this.countMode = CountMode.cumul,
     this.customLabel,
+    this.dartsVariant,
+    this.dartsRounds = 8,
   });
 
   int get teamCount => teamNames.length;
@@ -28,6 +33,8 @@ class GameConfig {
     int? targetScore,
     CountMode? countMode,
     String? customLabel,
+    DartsVariant? dartsVariant,
+    int? dartsRounds,
   }) =>
       GameConfig(
         gameType: gameType ?? this.gameType,
@@ -35,5 +42,7 @@ class GameConfig {
         targetScore: targetScore ?? this.targetScore,
         countMode: countMode ?? this.countMode,
         customLabel: customLabel ?? this.customLabel,
+        dartsVariant: dartsVariant ?? this.dartsVariant,
+        dartsRounds: dartsRounds ?? this.dartsRounds,
       );
 }

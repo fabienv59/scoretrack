@@ -565,7 +565,7 @@ class _TeamRow extends StatelessWidget {
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isWinner ? AppColors.success : color.withOpacity(0.3),
+            color: isWinner ? AppColors.success : color.withValues(alpha: 0.3),
             width: isWinner ? 2 : 1,
           ),
         ),
@@ -652,9 +652,9 @@ class _BigButton extends StatelessWidget {
         padding:
             label != null ? const EdgeInsets.symmetric(horizontal: 16) : null,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.12),
+          color: color.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.4), width: 2),
+          border: Border.all(color: color.withValues(alpha: 0.4), width: 2),
         ),
         child: label != null
             ? Row(
@@ -692,9 +692,9 @@ class _SmallButton extends StatelessWidget {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.12),
+          color: color.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.4)),
+          border: Border.all(color: color.withValues(alpha: 0.4)),
         ),
         child: Icon(icon, color: color, size: 22),
       ),
@@ -751,9 +751,9 @@ class _ValueButton extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.12),
+          color: color.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(big ? 16 : 10),
-          border: Border.all(color: color.withOpacity(0.4), width: big ? 2 : 1),
+          border: Border.all(color: color.withValues(alpha: 0.4), width: big ? 2 : 1),
         ),
         child: Center(
           child: Text(
@@ -821,12 +821,12 @@ class _ScoreInputFieldState extends State<_ScoreInputField> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide:
-                    BorderSide(color: widget.color.withOpacity(0.4)),
+                    BorderSide(color: widget.color.withValues(alpha: 0.4)),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide:
-                    BorderSide(color: widget.color.withOpacity(0.4)),
+                    BorderSide(color: widget.color.withValues(alpha: 0.4)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),

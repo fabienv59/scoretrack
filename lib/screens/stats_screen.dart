@@ -151,7 +151,7 @@ class _StatCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,7 +193,7 @@ class _GameBreakdown extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -274,8 +274,8 @@ class _LockedOverlay extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 stops: const [0.0, 0.35, 1.0],
                 colors: [
-                  AppColors.background.withOpacity(0.2),
-                  AppColors.background.withOpacity(0.7),
+                  AppColors.background.withValues(alpha: 0.2),
+                  AppColors.background.withValues(alpha: 0.7),
                   AppColors.background,
                 ],
               ),
@@ -364,7 +364,7 @@ class _TeaserCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

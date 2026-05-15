@@ -140,10 +140,10 @@ class _ThemeItem extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withOpacity(0.15),
+                  color: AppColors.accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                   border:
-                      Border.all(color: AppColors.accent.withOpacity(0.4)),
+                      Border.all(color: AppColors.accent.withValues(alpha: 0.4)),
                 ),
                 child: const Text(
                   'Pro',
@@ -205,7 +205,7 @@ class _ThemeToggle extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
         ),
         child: Stack(
           children: [
@@ -217,10 +217,10 @@ class _ThemeToggle extends StatelessWidget {
                 width: 58,
                 height: 30,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.25),
+                  color: AppColors.primary.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                      color: AppColors.primary.withOpacity(0.5), width: 1.5),
+                      color: AppColors.primary.withValues(alpha: 0.5), width: 1.5),
                 ),
               ),
             ),
@@ -279,14 +279,14 @@ class _ProBanner extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColors.primary.withOpacity(0.25),
-              AppColors.accent.withOpacity(0.1),
+              AppColors.primary.withValues(alpha: 0.25),
+              AppColors.accent.withValues(alpha: 0.1),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.primary.withOpacity(0.5)),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.5)),
         ),
         child: const Row(
           children: [
@@ -330,9 +330,9 @@ class _ProActiveBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.1),
+        color: AppColors.success.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.success.withOpacity(0.4)),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.4)),
       ),
       child: const Row(
         children: [
@@ -396,7 +396,7 @@ class _SettingsSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
           ),
           child: Column(children: items),
         ),

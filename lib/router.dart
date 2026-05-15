@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'games/darts/darts_game_screen.dart';
 import 'games/volleyball/volleyball_screen.dart';
 import 'screens/custom_game_screen.dart';
 import 'screens/game_screen.dart';
@@ -73,6 +74,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/molkky',
         builder: (context, state) => const MolkkyGameScreen(),
+      ),
+      GoRoute(
+        path: '/darts',
+        builder: (context, state) => const DartsGameScreen(),
       ),
       GoRoute(
         path: '/pro',

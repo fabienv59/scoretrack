@@ -70,8 +70,8 @@ class MolkkyNotifier extends StateNotifier<MolkkyState> {
   final _history = <MolkkyState>[];
 
   MolkkyNotifier()
-      : super(MolkkyState(
-          teams: const [
+      : super(const MolkkyState(
+          teams: [
             MolkkyTeam(name: 'Équipe 1'),
             MolkkyTeam(name: 'Équipe 2'),
           ],

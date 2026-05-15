@@ -404,11 +404,11 @@ class _TeamPanel extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: isActive
-                      ? color.withOpacity(0.15)
+                      ? color.withValues(alpha: 0.15)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
                   border: isActive
-                      ? Border.all(color: color.withOpacity(0.5))
+                      ? Border.all(color: color.withValues(alpha: 0.5))
                       : null,
                 ),
                 child: Text(
@@ -477,9 +477,9 @@ class _TeamPanel extends StatelessWidget {
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
                 child: team.consecutiveMisses == 2 && !team.isEliminated
-                    ? Padding(
-                        key: const ValueKey('warn'),
-                        padding: const EdgeInsets.only(top: 5),
+                    ? const Padding(
+                        key: ValueKey('warn'),
+                        padding: EdgeInsets.only(top: 5),
                         child: Text(
                           '⚠️ Dernier essai !',
                           style: TextStyle(
@@ -552,7 +552,7 @@ class _TurnIndicator extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.35)),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -596,7 +596,7 @@ class _ThrowInput extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(
-          top: BorderSide(color: AppColors.primary.withOpacity(0.18)),
+          top: BorderSide(color: AppColors.primary.withValues(alpha: 0.18)),
         ),
       ),
       child: Column(
@@ -612,10 +612,10 @@ class _ThrowInput extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 11),
                     decoration: BoxDecoration(
-                      color: AppColors.error.withOpacity(0.1),
+                      color: AppColors.error.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                       border:
-                          Border.all(color: AppColors.error.withOpacity(0.45)),
+                          Border.all(color: AppColors.error.withValues(alpha: 0.45)),
                     ),
                     child: const Column(
                       mainAxisSize: MainAxisSize.min,
@@ -707,10 +707,10 @@ class _ModeToggleButton extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: 11),
         decoration: BoxDecoration(
-          color: selected ? color.withOpacity(0.18) : AppColors.background,
+          color: selected ? color.withValues(alpha: 0.18) : AppColors.background,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: selected ? color : color.withOpacity(0.3),
+            color: selected ? color : color.withValues(alpha: 0.3),
             width: selected ? 2 : 1,
           ),
         ),
@@ -761,9 +761,9 @@ class _NumberGrid extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: color.withOpacity(0.45), width: 1.5),
+              border: Border.all(color: color.withValues(alpha: 0.45), width: 1.5),
             ),
             child: Center(
               child: Text(

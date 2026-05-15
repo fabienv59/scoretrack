@@ -21,6 +21,8 @@ enum GameType {
         return 'Best of 5 sets · 25 pts · 15 tie-break';
       case GameType.molkky:
         return 'Exactement 50 pts · 3 ratés = éliminé';
+      case GameType.darts:
+        return '501 · 301 · Count Up · Horloge';
       case GameType.custom:
         return 'Règles libres';
       default:

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/count_mode.dart';
+import '../models/darts_variant.dart';
 import '../models/game_config.dart';
 import '../models/game_type.dart';
 import '../providers/game_config_provider.dart';
@@ -24,6 +25,8 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
   final _team2Controller = TextEditingController(text: 'Équipe 2');
   late final TextEditingController _targetController;
   CountMode _countMode = CountMode.cumul;
+  DartsVariant _dartsVariant = DartsVariant.darts501;
+  int _dartsRounds = 8;
 
   @override
   void initState() {
@@ -44,6 +47,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
 
   bool get _isMolkky => _gameType == GameType.molkky;
   bool get _isVolleyball => _gameType == GameType.volleyball;
+  bool get _isDarts => _gameType == GameType.darts;
   // Jeux avec règles fixes : pas de config manuelle du score limite
   bool get _hasFixedRules => _isMolkky || _isVolleyball;
 
@@ -59,11 +63,22 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
         : _team2Controller.text.trim();
 
     if (_isVolleyball) {
-      // Volleyball : moteur dédié, on passe les noms en extra go_router
       context.push(
         '/game/volleyball',
         extra: {'teamA': name1, 'teamB': name2},
       );
+      return;
+    }
+
+    if (_isDarts) {
+      ref.read(gameConfigProvider.notifier).setConfig(GameConfig(
+            gameType: _gameType,
+            teamNames: [name1, name2],
+            targetScore: 0,
+            dartsVariant: _dartsVariant,
+            dartsRounds: _dartsRounds,
+          ));
+      context.push('/darts');
       return;
     }
 
@@ -83,10 +98,6 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
           );
       context.push('/game');
     }
-  }
-
-  void _setDartsVariant(int score) {
-    setState(() => _targetController.text = '$score');
   }
 
   @override
@@ -162,9 +173,24 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
             _sectionLabel('CONFIGURATION'),
             const SizedBox(height: 12),
 
-            // ── Jeux à règles fixes : carte d'info, pas de config manuelle ──
+            // ── Jeux à règles fixes ───────────────────────────────────────
             if (_hasFixedRules) ...[
               _RulesCard(gameType: _gameType),
+            ] else if (_isDarts) ...[
+              // ── Variantes fléchettes ──────────────────────────────────────
+              _DartsVariantSelector(
+                selected: _dartsVariant,
+                onSelect: (v) => setState(() => _dartsVariant = v),
+              ),
+              if (_dartsVariant == DartsVariant.countUp) ...[
+                const SizedBox(height: 20),
+                _sectionLabel('NOMBRE DE MANCHES'),
+                const SizedBox(height: 10),
+                _RoundsSelector(
+                  rounds: _dartsRounds,
+                  onChanged: (r) => setState(() => _dartsRounds = r),
+                ),
+              ],
             ] else ...[
               // ── Score limite ─────────────────────────────────────────────
               TextField(
@@ -178,53 +204,6 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                       Icon(Icons.flag_outlined, color: AppColors.accent),
                 ),
               ),
-              // ── Variantes fléchettes ─────────────────────────────────────
-              if (_gameType == GameType.darts) ...[
-                const SizedBox(height: 12),
-                const Text(
-                  'Variante rapide',
-                  style: TextStyle(
-                      color: AppColors.textSecondary, fontSize: 12),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [301, 501, 701].map((v) {
-                    final selected = _targetController.text == '$v';
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: GestureDetector(
-                        onTap: () => _setDartsVariant(v),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: selected
-                                ? AppColors.primary
-                                : AppColors.surface,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: selected
-                                  ? AppColors.primary
-                                  : AppColors.primary.withOpacity(0.3),
-                            ),
-                          ),
-                          child: Text(
-                            '$v',
-                            style: TextStyle(
-                              color: selected
-                                  ? Colors.white
-                                  : AppColors.textPrimary,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
               const SizedBox(height: 24),
               // ── Mode de comptage ─────────────────────────────────────────
               const Text(
@@ -247,13 +226,13 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
                             color: selected
-                                ? AppColors.primary.withOpacity(0.15)
+                                ? AppColors.primary.withValues(alpha: 0.15)
                                 : AppColors.surface,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: selected
                                   ? AppColors.primary
-                                  : AppColors.primary.withOpacity(0.2),
+                                  : AppColors.primary.withValues(alpha: 0.2),
                               width: selected ? 2 : 1,
                             ),
                           ),
@@ -308,6 +287,129 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
       );
 }
 
+// ─── Sélecteur de variante fléchettes ────────────────────────────────────────
+
+class _DartsVariantSelector extends StatelessWidget {
+  final DartsVariant selected;
+  final void Function(DartsVariant) onSelect;
+
+  const _DartsVariantSelector({
+    required this.selected,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: DartsVariant.values.map((v) {
+            final isSelected = v == selected;
+            return GestureDetector(
+              onTap: () => onSelect(v),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                width: (MediaQuery.of(context).size.width - 48 - 10) / 2,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppColors.primary.withValues(alpha: 0.12)
+                      : AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.primary.withValues(alpha: 0.2),
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      v.label,
+                      style: TextStyle(
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      v.subtitle,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 10,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Sélecteur de nombre de manches (Count Up) ────────────────────────────────
+
+class _RoundsSelector extends StatelessWidget {
+  final int rounds;
+  final void Function(int) onChanged;
+
+  const _RoundsSelector({required this.rounds, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          onPressed: rounds > 3 ? () => onChanged(rounds - 1) : null,
+          icon: const Icon(Icons.remove_circle_outline_rounded),
+          color: AppColors.primary,
+          iconSize: 28,
+        ),
+        const SizedBox(width: 16),
+        Column(
+          children: [
+            Text(
+              '$rounds',
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const Text(
+              'manches',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(width: 16),
+        IconButton(
+          onPressed: rounds < 20 ? () => onChanged(rounds + 1) : null,
+          icon: const Icon(Icons.add_circle_outline_rounded),
+          color: AppColors.primary,
+          iconSize: 28,
+        ),
+      ],
+    );
+  }
+}
+
 // ─── Carte de règles pour les jeux à moteur dédié ─────────────────────────────
 
 /// Affiche un résumé des règles fixes selon le jeu (Mölkky, Volleyball…).
@@ -325,7 +427,7 @@ class _RulesCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: rules

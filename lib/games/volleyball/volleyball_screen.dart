@@ -318,7 +318,7 @@ class _TeamPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -336,7 +336,7 @@ class _TeamPanel extends StatelessWidget {
                     color: AppColors.background,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                        color: AppColors.textSecondary.withOpacity(0.3)),
+                        color: AppColors.textSecondary.withValues(alpha: 0.3)),
                   ),
                   child: const Icon(Icons.remove,
                       size: 16, color: AppColors.textSecondary),
@@ -390,7 +390,7 @@ class _TeamPanel extends StatelessWidget {
                 height: 56,
                 decoration: BoxDecoration(
                   color: matchOver
-                      ? AppColors.primary.withOpacity(0.3)
+                      ? AppColors.primary.withValues(alpha: 0.3)
                       : AppColors.primary,
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -476,7 +476,7 @@ class _SetsHistory extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withOpacity(0.15)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

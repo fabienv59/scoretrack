@@ -57,10 +57,10 @@ class HistoryScreen extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                          color: AppColors.primary.withOpacity(0.3)),
+                          color: AppColors.primary.withValues(alpha: 0.3)),
                     ),
                     child: const Row(
                       children: [
@@ -214,8 +214,8 @@ class _ExportButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: locked
-                ? AppColors.textSecondary.withOpacity(0.2)
-                : AppColors.primary.withOpacity(0.4),
+                ? AppColors.textSecondary.withValues(alpha: 0.2)
+                : AppColors.primary.withValues(alpha: 0.4),
           ),
         ),
         child: Row(
@@ -263,7 +263,7 @@ class _MatchCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withOpacity(0.15)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
       ),
       child: Column(
         children: [

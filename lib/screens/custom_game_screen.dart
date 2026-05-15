@@ -112,7 +112,7 @@ class _CustomGameScreenState extends ConsumerState<CustomGameScreen> {
                           border: Border.all(
                             color: selected
                                 ? AppColors.primary
-                                : AppColors.primary.withOpacity(0.2),
+                                : AppColors.primary.withValues(alpha: 0.2),
                           ),
                         ),
                         alignment: Alignment.center,
@@ -184,13 +184,13 @@ class _CustomGameScreenState extends ConsumerState<CustomGameScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
                           color: selected
-                              ? AppColors.primary.withOpacity(0.15)
+                              ? AppColors.primary.withValues(alpha: 0.15)
                               : AppColors.surface,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: selected
                                 ? AppColors.primary
-                                : AppColors.primary.withOpacity(0.2),
+                                : AppColors.primary.withValues(alpha: 0.2),
                             width: selected ? 2 : 1,
                           ),
                         ),

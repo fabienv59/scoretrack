@@ -26,7 +26,7 @@ ThemeData buildDarkTheme() {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.surface,
-      indicatorColor: AppColors.primary.withOpacity(0.25),
+      indicatorColor: AppColors.primary.withValues(alpha: 0.25),
       iconTheme: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
           return const IconThemeData(color: AppColors.primary, size: 24);
@@ -63,7 +63,7 @@ ThemeData buildDarkTheme() {
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide:
-            BorderSide(color: AppColors.primary.withOpacity(0.3)),
+            BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -72,7 +72,7 @@ ThemeData buildDarkTheme() {
       labelStyle: const TextStyle(color: AppColors.textSecondary),
       hintStyle: const TextStyle(color: AppColors.textSecondary),
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: AppColors.surface,
       shape:
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -88,7 +88,7 @@ ThemeData buildDarkTheme() {
           fontSize: 18,
           fontWeight: FontWeight.w700),
     ),
-    dialogTheme: DialogTheme(
+    dialogTheme: DialogThemeData(
       backgroundColor: AppColors.surface,
       shape:
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -118,11 +118,11 @@ ThemeData buildLightTheme() {
       centerTitle: true,
       titleTextStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 0,
     ),
-    dialogTheme: DialogTheme(
+    dialogTheme: DialogThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),
   );

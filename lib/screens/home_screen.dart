@@ -116,10 +116,10 @@ class HomeScreen extends ConsumerWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.15),
+                color: AppColors.primary.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
                 border:
-                    Border.all(color: AppColors.primary.withOpacity(0.4)),
+                    Border.all(color: AppColors.primary.withValues(alpha: 0.4)),
               ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -193,8 +193,8 @@ class _GameCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: locked
-                ? AppColors.textSecondary.withOpacity(0.3)
-                : AppColors.primary.withOpacity(0.2),
+                ? AppColors.textSecondary.withValues(alpha: 0.3)
+                : AppColors.primary.withValues(alpha: 0.2),
           ),
         ),
         child: Stack(
