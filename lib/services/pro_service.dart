@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String _kProProductId = 'scoretrack_pro_yearly';
+const String _kProProductId = 'scoretrack_pro_annual';
 const String _kIsProKey = 'is_pro';
 
 class ProService {

@@ -1,9 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../providers/pro_provider.dart';
 import '../providers/theme_provider.dart';
 import '../theme.dart';
+
+final _appVersionProvider = FutureProvider<String>((ref) async {
+  final info = await PackageInfo.fromPlatform();
+  return info.version;
+});
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -12,19 +19,20 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isPro = ref.watch(proProvider).isPro;
     final themeMode = ref.watch(themeProvider);
+    final version = ref.watch(_appVersionProvider).valueOrNull ?? '—';
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.bgColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(24, 32, 24, 24),
               child: Text(
                 'Paramètres',
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: context.textColor,
                   fontSize: 34,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.5,
@@ -63,13 +71,13 @@ class SettingsScreen extends ConsumerWidget {
                   _SettingsSection(
                     title: 'À propos',
                     items: [
-                      const _SettingsItem(
+                      _SettingsItem(
                         icon: Icons.info_outline_rounded,
                         title: 'Version',
-                        trailing: '1.0.0',
+                        trailing: version,
                       ),
                       _SettingsDivider(),
-                      const _SettingsItem(
+                      _SettingsItem(
                         icon: Icons.person_outline_rounded,
                         title: 'Développé par',
                         trailing: 'VanByte',
@@ -78,7 +86,7 @@ class SettingsScreen extends ConsumerWidget {
                   ),
 
                   // Section dev (réinitialiser Pro — visible uniquement si Pro)
-                  if (isPro) ...[
+                  if (kDebugMode) ...[
                     const SizedBox(height: 24),
                     _SettingsSection(
                       title: 'Développeur',
@@ -93,6 +101,7 @@ class SettingsScreen extends ConsumerWidget {
                       ],
                     ),
                   ],
+
                 ],
               ),
             ),
@@ -145,7 +154,7 @@ class _ThemeItem extends StatelessWidget {
                   border:
                       Border.all(color: AppColors.accent.withValues(alpha: 0.4)),
                 ),
-                child: const Text(
+                child: Text(
                   'Pro',
                   style: TextStyle(
                     color: AppColors.accent,
@@ -161,7 +170,7 @@ class _ThemeItem extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
           Icon(
@@ -171,10 +180,10 @@ class _ThemeItem extends StatelessWidget {
             color: AppColors.accent,
             size: 20,
           ),
-          const SizedBox(width: 12),
-          const Expanded(
+          SizedBox(width: 12),
+          Expanded(
             child: Text('Thème',
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 15)),
+                style: TextStyle(color: context.textColor, fontSize: 15)),
           ),
           _ThemeToggle(
             isDark: themeMode == ThemeMode.dark,
@@ -192,25 +201,25 @@ class _ThemeToggle extends StatelessWidget {
   final bool isDark;
   final void Function(bool) onChanged;
 
-  const _ThemeToggle({required this.isDark, required this.onChanged});
+  _ThemeToggle({required this.isDark, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => onChanged(!isDark),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: Duration(milliseconds: 200),
         width: 120,
         height: 34,
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.surfaceColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
         ),
         child: Stack(
           children: [
             AnimatedPositioned(
-              duration: const Duration(milliseconds: 200),
+              duration: Duration(milliseconds: 200),
               left: isDark ? 0 : 58,
               top: 2,
               child: Container(
@@ -232,7 +241,7 @@ class _ThemeToggle extends StatelessWidget {
                       'Sombre',
                       style: TextStyle(
                         color: isDark
-                            ? AppColors.textPrimary
+                            ? context.textColor
                             : AppColors.textSecondary,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -246,7 +255,7 @@ class _ThemeToggle extends StatelessWidget {
                       'Clair',
                       style: TextStyle(
                         color: !isDark
-                            ? AppColors.textPrimary
+                            ? context.textColor
                             : AppColors.textSecondary,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -275,7 +284,7 @@ class _ProBanner extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -288,7 +297,7 @@ class _ProBanner extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppColors.primary.withValues(alpha: 0.5)),
         ),
-        child: const Row(
+        child: Row(
           children: [
             Text('⭐', style: TextStyle(fontSize: 28)),
             SizedBox(width: 16),
@@ -299,7 +308,7 @@ class _ProBanner extends StatelessWidget {
                   Text(
                     '⭐ Passer à Pro',
                     style: TextStyle(
-                      color: AppColors.textPrimary,
+                      color: context.textColor,
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                     ),
@@ -373,7 +382,7 @@ class _SettingsSection extends StatelessWidget {
   final String title;
   final List<Widget> items;
 
-  const _SettingsSection({required this.title, required this.items});
+  _SettingsSection({required this.title, required this.items});
 
   @override
   Widget build(BuildContext context) {
@@ -381,10 +390,10 @@ class _SettingsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          padding: EdgeInsets.only(left: 4, bottom: 8),
           child: Text(
             title.toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 11,
               fontWeight: FontWeight.w700,
@@ -394,7 +403,7 @@ class _SettingsSection extends StatelessWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.surfaceColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
           ),
@@ -408,7 +417,7 @@ class _SettingsSection extends StatelessWidget {
 class _SettingsDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Divider(
+    return Divider(
       height: 1,
       indent: 16,
       endIndent: 16,
@@ -424,7 +433,7 @@ class _SettingsItem extends StatelessWidget {
   final VoidCallback? onTap;
   final bool destructive;
 
-  const _SettingsItem({
+  _SettingsItem({
     required this.icon,
     required this.title,
     this.trailing,
@@ -434,7 +443,7 @@ class _SettingsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = destructive ? AppColors.error : AppColors.textPrimary;
+    final color = destructive ? AppColors.error : context.textColor;
     final iconColor =
         destructive ? AppColors.error : AppColors.textSecondary;
 

@@ -1,12 +1,9 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../config/ad_config.dart';
+import '../../widgets/banner_ad_widget.dart';
 import '../../models/darts_variant.dart';
 import '../../models/game_type.dart';
 import '../../models/match_record.dart';
@@ -68,7 +65,7 @@ class _DartsGameScreenState extends ConsumerState<DartsGameScreen> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
                 'BUST ! Volée annulée — score inchangé',
                 style: TextStyle(fontWeight: FontWeight.w700),
@@ -96,7 +93,7 @@ class _DartsGameScreenState extends ConsumerState<DartsGameScreen> {
         if (!didPop) await _tryAbandon();
       },
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.bgColor,
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.close),
@@ -123,7 +120,7 @@ class _DartsGameScreenState extends ConsumerState<DartsGameScreen> {
                   : null,
             ),
             IconButton(
-              icon: const Icon(Icons.help_outline_rounded),
+              icon: Icon(Icons.help_outline_rounded),
               tooltip: 'Règles',
               onPressed: () => _showRules(variant),
             ),
@@ -143,8 +140,8 @@ class _DartsGameScreenState extends ConsumerState<DartsGameScreen> {
                   ),
                   Container(
                     width: 1,
-                    margin: const EdgeInsets.symmetric(vertical: 32),
-                    color: AppColors.surface,
+                    margin: EdgeInsets.symmetric(vertical: 32),
+                    color: context.surfaceColor,
                   ),
                   _PlayerPanel(
                     player: state.players[1],
@@ -184,7 +181,7 @@ class _DartsGameScreenState extends ConsumerState<DartsGameScreen> {
                           setState(() => _doubleFinish = v),
                       onValidate: _validate,
                     ),
-            if (!isPro) const _BannerAdWidget(),
+            if (!isPro) const BannerAdWidget(),
           ],
         ),
       ),
@@ -258,24 +255,24 @@ class _DartsGameScreenState extends ConsumerState<DartsGameScreen> {
           children: [
             Text(
               winnerName != null ? '🏆' : '🤝',
-              style: const TextStyle(fontSize: 56),
+              style: TextStyle(fontSize: 56),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text(
               winnerName != null ? 'Victoire !' : 'Égalité !',
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: context.textColor,
                 fontSize: 26,
                 fontWeight: FontWeight.w900,
               ),
               textAlign: TextAlign.center,
             ),
             if (winnerName != null) ...[
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 winnerName,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.success,
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -283,17 +280,17 @@ class _DartsGameScreenState extends ConsumerState<DartsGameScreen> {
                 textAlign: TextAlign.center,
               ),
             ],
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.background,
+                color: context.bgColor,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 '$score1  —  $score2',
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  color: context.textColor,
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 2,
@@ -374,24 +371,24 @@ class _DartsGameScreenState extends ConsumerState<DartsGameScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(
           '🎯  ${variant.label}',
-          style: const TextStyle(color: AppColors.textPrimary),
+          style: TextStyle(color: context.textColor),
           textAlign: TextAlign.center,
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: rules
               .map((r) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    padding: EdgeInsets.symmetric(vertical: 5),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(r.$1, style: const TextStyle(fontSize: 16)),
-                        const SizedBox(width: 10),
+                        Text(r.$1, style: TextStyle(fontSize: 16)),
+                        SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             r.$2,
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
+                            style: TextStyle(
+                              color: context.textColor,
                               fontSize: 13,
                               height: 1.45,
                             ),
@@ -407,8 +404,8 @@ class _DartsGameScreenState extends ConsumerState<DartsGameScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx),
             style:
-                ElevatedButton.styleFrom(minimumSize: const Size(120, 44)),
-            child: const Text('Compris'),
+                ElevatedButton.styleFrom(minimumSize: Size(120, 44)),
+            child: Text('Compris'),
           ),
         ],
       ),
@@ -421,8 +418,8 @@ class _DartsGameScreenState extends ConsumerState<DartsGameScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Abandonner ?',
-            style: TextStyle(color: AppColors.textPrimary)),
+        title: Text('Abandonner ?',
+            style: TextStyle(color: context.textColor)),
         content: const Text(
           'La partie en cours ne sera pas sauvegardée.',
           style: TextStyle(color: AppColors.textSecondary),
@@ -540,12 +537,12 @@ class _ScorePlayerContent extends StatelessWidget {
       children: [
         Text(
           isCountdown ? 'Reste' : 'Score',
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textSecondary,
             fontSize: 11,
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
@@ -559,14 +556,14 @@ class _ScorePlayerContent extends StatelessWidget {
           ),
         ),
         if (isCountdown && startScore > 0) ...[
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: EdgeInsets.symmetric(horizontal: 4),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(5),
               child: LinearProgressIndicator(
                 value: 1.0 - (player.score / startScore).clamp(0.0, 1.0),
-                backgroundColor: AppColors.surface,
+                backgroundColor: context.surfaceColor,
                 valueColor: AlwaysStoppedAnimation<Color>(
                   player.score == 0 ? AppColors.success : color,
                 ),
@@ -574,17 +571,17 @@ class _ScorePlayerContent extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 3),
+          SizedBox(height: 3),
           Text(
             '${startScore - player.score} pts marqués',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 10,
             ),
           ),
         ],
         if (variant == DartsVariant.countUp) ...[
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             'Manche ${player.roundsPlayed}/$totalRounds',
             style: TextStyle(
@@ -593,14 +590,14 @@ class _ScorePlayerContent extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: EdgeInsets.symmetric(horizontal: 4),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(5),
               child: LinearProgressIndicator(
                 value: (player.roundsPlayed / totalRounds).clamp(0.0, 1.0),
-                backgroundColor: AppColors.surface,
+                backgroundColor: context.surfaceColor,
                 valueColor: AlwaysStoppedAnimation<Color>(color),
                 minHeight: 6,
               ),
@@ -633,10 +630,10 @@ class _RtcPlayerContent extends StatelessWidget {
       children: [
         Text(
           isDone ? 'Terminé' : 'Vise',
-          style: const TextStyle(
+          style: TextStyle(
               color: AppColors.textSecondary, fontSize: 11),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
@@ -651,14 +648,14 @@ class _RtcPlayerContent extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+          padding: EdgeInsets.symmetric(horizontal: 4),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(5),
             child: LinearProgressIndicator(
               value: (player.score / kRtcTotalZones).clamp(0.0, 1.0),
-              backgroundColor: AppColors.surface,
+              backgroundColor: context.surfaceColor,
               valueColor: AlwaysStoppedAnimation<Color>(
                 isDone ? AppColors.success : color,
               ),
@@ -688,7 +685,7 @@ class _VolleyInput extends StatelessWidget {
   final void Function(bool) onDoubleToggle;
   final VoidCallback onValidate;
 
-  const _VolleyInput({
+  _VolleyInput({
     required this.entry,
     required this.doubleFinish,
     required this.showDoubleToggle,
@@ -703,9 +700,9 @@ class _VolleyInput extends StatelessWidget {
     final displayValue = entry.isEmpty ? '0' : entry;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+      padding: EdgeInsets.fromLTRB(12, 10, 12, 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.surfaceColor,
         border: Border(
           top: BorderSide(color: AppColors.primary.withValues(alpha: 0.18)),
         ),
@@ -717,40 +714,40 @@ class _VolleyInput extends StatelessWidget {
           Container(
             width: double.infinity,
             padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: AppColors.background,
+              color: context.bgColor,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
               displayValue,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: context.textColor,
                 fontSize: 36,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 2,
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
 
           // Pavé numérique
           _Keypad(onDigit: onDigit, onBackspace: onBackspace),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
 
           // Toggle "Double final" (uniquement pour les variantes countdown)
           if (showDoubleToggle)
             GestureDetector(
               onTap: () => onDoubleToggle(!doubleFinish),
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                padding: const EdgeInsets.symmetric(
+                duration: Duration(milliseconds: 150),
+                padding: EdgeInsets.symmetric(
                     horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
                   color: doubleFinish
                       ? AppColors.success.withValues(alpha: 0.15)
-                      : AppColors.background,
+                      : context.bgColor,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: doubleFinish
@@ -828,7 +825,7 @@ class _Keypad extends StatelessWidget {
     return Column(
       children: rows.map((row) {
         return Padding(
-          padding: const EdgeInsets.only(bottom: 6),
+          padding: EdgeInsets.only(bottom: 6),
           child: Row(
             children: row.map((key) {
               final isBackspace = key == '⌫';
@@ -839,18 +836,18 @@ class _Keypad extends StatelessWidget {
                     left: row.indexOf(key) > 0 ? 6 : 0,
                   ),
                   child: isEmpty
-                      ? const SizedBox.shrink()
+                      ? SizedBox.shrink()
                       : GestureDetector(
                           onTap: isBackspace
                               ? onBackspace
                               : () => onDigit(key),
                           child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 80),
+                            duration: Duration(milliseconds: 80),
                             height: 44,
                             decoration: BoxDecoration(
                               color: isBackspace
                                   ? AppColors.error.withValues(alpha: 0.1)
-                                  : AppColors.background,
+                                  : context.bgColor,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: isBackspace
@@ -864,7 +861,7 @@ class _Keypad extends StatelessWidget {
                                 style: TextStyle(
                                   color: isBackspace
                                       ? AppColors.error
-                                      : AppColors.textPrimary,
+                                      : context.textColor,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -889,7 +886,7 @@ class _RtcInput extends StatelessWidget {
   final Color color;
   final void Function(int) onZones;
 
-  const _RtcInput({
+  _RtcInput({
     required this.teamName,
     required this.color,
     required this.onZones,
@@ -898,9 +895,9 @@ class _RtcInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, 16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.surfaceColor,
         border: Border(
           top: BorderSide(color: AppColors.primary.withValues(alpha: 0.18)),
         ),
@@ -968,59 +965,3 @@ class _RtcInput extends StatelessWidget {
 
 // ─── Bannière AdMob ───────────────────────────────────────────────────────────
 
-class _BannerAdWidget extends StatefulWidget {
-  const _BannerAdWidget();
-
-  @override
-  State<_BannerAdWidget> createState() => _BannerAdWidgetState();
-}
-
-class _BannerAdWidgetState extends State<_BannerAdWidget> {
-  BannerAd? _ad;
-  bool _loaded = false;
-
-  static bool get _supported =>
-      !kIsWeb && (Platform.isAndroid || Platform.isIOS);
-
-  @override
-  void initState() {
-    super.initState();
-    if (_supported) _loadAd();
-  }
-
-  void _loadAd() {
-    _ad = BannerAd(
-      adUnitId: AdConfig.bannerAdUnitId,
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (_) {
-          if (mounted) setState(() => _loaded = true);
-        },
-        onAdFailedToLoad: (ad, _) {
-          ad.dispose();
-          _ad = null;
-        },
-      ),
-    )..load();
-  }
-
-  @override
-  void dispose() {
-    _ad?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_supported || !_loaded || _ad == null) return const SizedBox.shrink();
-    return SafeArea(
-      top: false,
-      child: SizedBox(
-        width: _ad!.size.width.toDouble(),
-        height: _ad!.size.height.toDouble(),
-        child: AdWidget(ad: _ad!),
-      ),
-    );
-  }
-}

@@ -48,6 +48,12 @@ class DatabaseService {
     return db.insert('matches', record.toMap());
   }
 
+  Future<int> importMatch(MatchRecord record) async {
+    final db = await database;
+    return db.insert('matches', record.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore);
+  }
+
   // Supprime les parties en excès pour les utilisateurs gratuits (garde les N plus récentes)
   Future<void> deleteMatchesExceedingLimit(int limit) async {
     final db = await database;

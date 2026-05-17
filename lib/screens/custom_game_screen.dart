@@ -65,7 +65,7 @@ class _CustomGameScreenState extends ConsumerState<CustomGameScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.bgColor,
       appBar: AppBar(
         title: const Text('🎮  Jeu personnalisé'),
         leading: IconButton(
@@ -83,7 +83,7 @@ class _CustomGameScreenState extends ConsumerState<CustomGameScreen> {
             const SizedBox(height: 12),
             TextField(
               controller: _gameNameController,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: context.textColor),
               textCapitalization: TextCapitalization.sentences,
               decoration: const InputDecoration(
                 labelText: 'Ex : Belote maison, Rami…',
@@ -107,7 +107,7 @@ class _CustomGameScreenState extends ConsumerState<CustomGameScreen> {
                         decoration: BoxDecoration(
                           color: selected
                               ? AppColors.primary
-                              : AppColors.surface,
+                              : context.surfaceColor,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: selected
@@ -121,7 +121,7 @@ class _CustomGameScreenState extends ConsumerState<CustomGameScreen> {
                           style: TextStyle(
                             color: selected
                                 ? Colors.white
-                                : AppColors.textPrimary,
+                                : context.textColor,
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                           ),
@@ -140,7 +140,7 @@ class _CustomGameScreenState extends ConsumerState<CustomGameScreen> {
                 padding: const EdgeInsets.only(bottom: 10),
                 child: TextField(
                   controller: _teamControllers[i],
-                  style: const TextStyle(color: AppColors.textPrimary),
+                  style: TextStyle(color: context.textColor),
                   textCapitalization: TextCapitalization.words,
                   decoration: InputDecoration(
                     labelText: 'Équipe ${i + 1}',
@@ -155,7 +155,7 @@ class _CustomGameScreenState extends ConsumerState<CustomGameScreen> {
             const SizedBox(height: 12),
             TextField(
               controller: _targetController,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: context.textColor),
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: const InputDecoration(
@@ -185,7 +185,7 @@ class _CustomGameScreenState extends ConsumerState<CustomGameScreen> {
                         decoration: BoxDecoration(
                           color: selected
                               ? AppColors.primary.withValues(alpha: 0.15)
-                              : AppColors.surface,
+                              : context.surfaceColor,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: selected
@@ -201,7 +201,7 @@ class _CustomGameScreenState extends ConsumerState<CustomGameScreen> {
                               style: TextStyle(
                                 color: selected
                                     ? AppColors.primary
-                                    : AppColors.textPrimary,
+                                    : context.textColor,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 14,
                               ),

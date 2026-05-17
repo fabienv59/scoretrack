@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../providers/pro_provider.dart';
 import '../../theme.dart';
+import '../../widgets/banner_ad_widget.dart';
 import 'volleyball_logic.dart';
 
 // ─── Écran principal ──────────────────────────────────────────────────────────
@@ -12,7 +14,7 @@ class VolleyballScreen extends ConsumerWidget {
   final String teamAName;
   final String teamBName;
 
-  const VolleyballScreen({
+  VolleyballScreen({
     super.key,
     required this.teamAName,
     required this.teamBName,
@@ -22,6 +24,7 @@ class VolleyballScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(volleyballProvider);
     final notifier = ref.read(volleyballProvider.notifier);
+    final isPro = ref.watch(proProvider).isPro;
 
     // Affiche le dialogue de fin de match dès que le statut change
     if (state.matchStatus != VolleyballMatchStatus.inProgress) {
@@ -32,7 +35,7 @@ class VolleyballScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.bgColor,
       appBar: AppBar(
         title: const Text('🏐  Volleyball'),
         leading: IconButton(
@@ -83,7 +86,9 @@ class VolleyballScreen extends ConsumerWidget {
             // ── 3. Historique des sets précédents ───────────────────────────
             _SetsHistory(history: state.setsHistory),
 
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
+
+            if (!isPro) const BannerAdWidget(),
           ],
         ),
       ),
@@ -97,8 +102,8 @@ class VolleyballScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Quitter la partie ?',
-            style: TextStyle(color: AppColors.textPrimary)),
+        title: Text('Quitter la partie ?',
+            style: TextStyle(color: context.textColor)),
         content: const Text(
           'La partie en cours sera perdue.',
           style: TextStyle(color: AppColors.textSecondary),
@@ -115,7 +120,7 @@ class VolleyballScreen extends ConsumerWidget {
               Navigator.pop(ctx);
               context.pop();
             },
-            child: const Text('Quitter',
+            child: Text('Quitter',
                 style: TextStyle(color: AppColors.error)),
           ),
         ],
@@ -138,26 +143,26 @@ class VolleyballScreen extends ConsumerWidget {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
+        backgroundColor: context.surfaceColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('🏐', style: TextStyle(fontSize: 48)),
-            const SizedBox(height: 12),
+            Text('🏐', style: TextStyle(fontSize: 48)),
+            SizedBox(height: 12),
             Text(
               winnerName,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.success,
                 fontSize: 24,
                 fontWeight: FontWeight.w900,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 4),
-            const Text(
+            SizedBox(height: 4),
+            Text(
               'remporte le match !',
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
+              style: TextStyle(color: context.textColor, fontSize: 16),
             ),
             const SizedBox(height: 8),
             // Score final des sets
@@ -193,7 +198,7 @@ class VolleyballScreen extends ConsumerWidget {
               Navigator.pop(ctx);
               context.pop();
             },
-            child: const Text('Quitter',
+            child: Text('Quitter',
                 style: TextStyle(color: AppColors.textSecondary)),
           ),
         ],
@@ -210,7 +215,7 @@ class _SetHeader extends StatelessWidget {
   final String teamAName;
   final String teamBName;
 
-  const _SetHeader({
+  _SetHeader({
     required this.state,
     required this.teamAName,
     required this.teamBName,
@@ -219,8 +224,8 @@ class _SetHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      color: AppColors.surface,
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      color: context.surfaceColor,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -232,8 +237,8 @@ class _SetHeader extends StatelessWidget {
             children: [
               Text(
                 'Set ${state.currentSetNumber}',
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  color: context.textColor,
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                 ),
@@ -303,7 +308,7 @@ class _TeamPanel extends StatelessWidget {
   final VoidCallback onAdd;
   final VoidCallback onRemove;
 
-  const _TeamPanel({
+  _TeamPanel({
     required this.teamName,
     required this.score,
     required this.isLeft,
@@ -316,7 +321,7 @@ class _TeamPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
@@ -324,7 +329,7 @@ class _TeamPanel extends StatelessWidget {
         children: [
           // ── Bouton [-] en haut, discret ─────────────────────────────────
           Padding(
-            padding: const EdgeInsets.only(top: 10, right: 10, left: 10),
+            padding: EdgeInsets.only(top: 10, right: 10, left: 10),
             child: Align(
               alignment: isLeft ? Alignment.centerRight : Alignment.centerLeft,
               child: GestureDetector(
@@ -333,7 +338,7 @@ class _TeamPanel extends StatelessWidget {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: AppColors.background,
+                    color: context.bgColor,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                         color: AppColors.textSecondary.withValues(alpha: 0.3)),
@@ -347,10 +352,10 @@ class _TeamPanel extends StatelessWidget {
 
           // ── Nom de l'équipe ─────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(horizontal: 8),
             child: Text(
               teamName,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -362,15 +367,15 @@ class _TeamPanel extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
 
           // ── Score du set en très grand ──────────────────────────────────
           Expanded(
             child: Center(
               child: Text(
                 '$score',
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  color: context.textColor,
                   fontSize: 80,
                   fontWeight: FontWeight.w900,
                   height: 1,
@@ -461,7 +466,7 @@ class _SetsHistory extends StatelessWidget {
 
       // Séparateur entre les sets (sauf après le dernier)
       if (i < history.length - 1) {
-        parts.add(const Padding(
+        parts.add(Padding(
           padding: EdgeInsets.symmetric(horizontal: 8),
           child: Text('|',
               style:
@@ -471,10 +476,10 @@ class _SetsHistory extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-      margin: const EdgeInsets.symmetric(horizontal: 12),
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      margin: EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
       ),

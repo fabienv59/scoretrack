@@ -15,17 +15,17 @@ class StatsScreen extends ConsumerWidget {
     final isPro = ref.watch(proProvider).isPro;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.bgColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(24, 32, 24, 16),
               child: Text(
                 'Statistiques',
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: context.textColor,
                   fontSize: 34,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.5,
@@ -121,16 +121,16 @@ class _StatsBody extends StatelessWidget {
           Row(
             children: [
               _StatCard(value: '$draws', label: 'Matchs nuls'),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               _StatCard(
                 value: mostPlayed.emoji,
                 label: 'Jeu favori\n${mostPlayed.label}',
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           _GameBreakdown(gameCounts: gameCounts),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
         ],
       ),
     );
@@ -141,15 +141,15 @@ class _StatCard extends StatelessWidget {
   final String value;
   final String label;
 
-  const _StatCard({required this.value, required this.label});
+  _StatCard({required this.value, required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.surfaceColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
         ),
@@ -158,16 +158,16 @@ class _StatCard extends StatelessWidget {
           children: [
             Text(
               value,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: context.textColor,
                 fontSize: 32,
                 fontWeight: FontWeight.w900,
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                   color: AppColors.textSecondary, fontSize: 12, height: 1.3),
             ),
           ],
@@ -180,7 +180,7 @@ class _StatCard extends StatelessWidget {
 class _GameBreakdown extends StatelessWidget {
   final Map<String, int> gameCounts;
 
-  const _GameBreakdown({required this.gameCounts});
+  _GameBreakdown({required this.gameCounts});
 
   @override
   Widget build(BuildContext context) {
@@ -189,56 +189,56 @@ class _GameBreakdown extends StatelessWidget {
     final total = gameCounts.values.fold(0, (a, b) => a + b);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Répartition par jeu',
             style: TextStyle(
-              color: AppColors.textPrimary,
+              color: context.textColor,
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           ...sorted.map((e) {
             final game = GameType.fromId(e.key);
             final pct = total > 0 ? e.value / total : 0.0;
             return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
+              padding: EdgeInsets.only(bottom: 10),
               child: Column(
                 children: [
                   Row(
                     children: [
                       Text(game.emoji,
-                          style: const TextStyle(fontSize: 16)),
-                      const SizedBox(width: 8),
+                          style: TextStyle(fontSize: 16)),
+                      SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           game.label,
-                          style: const TextStyle(
-                              color: AppColors.textPrimary, fontSize: 13),
+                          style: TextStyle(
+                              color: context.textColor, fontSize: 13),
                         ),
                       ),
                       Text(
                         '${e.value} partie${e.value > 1 ? "s" : ""}',
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: AppColors.textSecondary, fontSize: 12),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: pct,
-                      backgroundColor: AppColors.background,
+                      backgroundColor: context.bgColor,
                       valueColor: const AlwaysStoppedAnimation<Color>(
                           AppColors.primary),
                       minHeight: 6,
@@ -264,7 +264,7 @@ class _LockedOverlay extends StatelessWidget {
     return Stack(
       children: [
         // Teaser flou en arrière-plan
-        const _StatsTeaserBg(),
+        _StatsTeaserBg(),
         // Dégradé assombrissant
         Positioned.fill(
           child: Container(
@@ -272,11 +272,11 @@ class _LockedOverlay extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: const [0.0, 0.35, 1.0],
+                stops: [0.0, 0.35, 1.0],
                 colors: [
-                  AppColors.background.withValues(alpha: 0.2),
-                  AppColors.background.withValues(alpha: 0.7),
-                  AppColors.background,
+                  context.bgColor.withValues(alpha: 0.2),
+                  context.bgColor.withValues(alpha: 0.7),
+                  context.bgColor,
                 ],
               ),
             ),
@@ -289,12 +289,12 @@ class _LockedOverlay extends StatelessWidget {
           right: 24,
           child: Column(
             children: [
-              const Text('🔒', style: TextStyle(fontSize: 52)),
-              const SizedBox(height: 16),
-              const Text(
+              Text('🔒', style: TextStyle(fontSize: 52)),
+              SizedBox(height: 16),
+              Text(
                 'Statistiques Pro',
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: context.textColor,
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
                 ),
@@ -360,9 +360,9 @@ class _TeaserCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.surfaceColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
         ),
@@ -371,8 +371,8 @@ class _TeaserCard extends StatelessWidget {
           children: [
             Text(
               value,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: context.textColor,
                 fontSize: 32,
                 fontWeight: FontWeight.w900,
               ),

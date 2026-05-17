@@ -103,37 +103,37 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.bgColor,
       appBar: AppBar(
         title: Text('${_gameType.emoji}  ${_gameType.label}'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
+          icon: Icon(Icons.arrow_back_ios_new),
           onPressed: () => context.pop(),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             _sectionLabel('ÉQUIPES'),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: _team1Controller,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: context.textColor),
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
                 labelText: 'Équipe 1',
                 prefixIcon: const Icon(Icons.person, color: AppColors.primary),
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear,
+                  icon: Icon(Icons.clear,
                       color: AppColors.textSecondary, size: 18),
                   onPressed: () => _team1Controller.clear(),
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Center(
               child: Container(
                 width: 44,
@@ -143,7 +143,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
-                child: const Text(
+                child: Text(
                   'VS',
                   style: TextStyle(
                     color: AppColors.primary,
@@ -153,10 +153,10 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: _team2Controller,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: context.textColor),
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
                 labelText: 'Équipe 2',
@@ -169,9 +169,9 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 32),
             _sectionLabel('CONFIGURATION'),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
 
             // ── Jeux à règles fixes ───────────────────────────────────────
             if (_hasFixedRules) ...[
@@ -183,9 +183,9 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 onSelect: (v) => setState(() => _dartsVariant = v),
               ),
               if (_dartsVariant == DartsVariant.countUp) ...[
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 _sectionLabel('NOMBRE DE MANCHES'),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 _RoundsSelector(
                   rounds: _dartsRounds,
                   onChanged: (r) => setState(() => _dartsRounds = r),
@@ -195,23 +195,23 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               // ── Score limite ─────────────────────────────────────────────
               TextField(
                 controller: _targetController,
-                style: const TextStyle(color: AppColors.textPrimary),
+                style: TextStyle(color: context.textColor),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Score limite (0 = score libre)',
                   prefixIcon:
                       Icon(Icons.flag_outlined, color: AppColors.accent),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               // ── Mode de comptage ─────────────────────────────────────────
-              const Text(
+              Text(
                 'Mode de comptage',
                 style: TextStyle(
                     color: AppColors.textSecondary, fontSize: 12),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
               Row(
                 children: CountMode.values.map((mode) {
                   final selected = _countMode == mode;
@@ -222,12 +222,12 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                       child: GestureDetector(
                         onTap: () => setState(() => _countMode = mode),
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          duration: Duration(milliseconds: 150),
+                          padding: EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
                             color: selected
                                 ? AppColors.primary.withValues(alpha: 0.15)
-                                : AppColors.surface,
+                                : context.surfaceColor,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: selected
@@ -243,7 +243,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                                 style: TextStyle(
                                   color: selected
                                       ? AppColors.primary
-                                      : AppColors.textPrimary,
+                                      : context.textColor,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 14,
                                 ),
@@ -293,7 +293,7 @@ class _DartsVariantSelector extends StatelessWidget {
   final DartsVariant selected;
   final void Function(DartsVariant) onSelect;
 
-  const _DartsVariantSelector({
+  _DartsVariantSelector({
     required this.selected,
     required this.onSelect,
   });
@@ -311,13 +311,13 @@ class _DartsVariantSelector extends StatelessWidget {
             return GestureDetector(
               onTap: () => onSelect(v),
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
+                duration: Duration(milliseconds: 150),
                 width: (MediaQuery.of(context).size.width - 48 - 10) / 2,
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? AppColors.primary.withValues(alpha: 0.12)
-                      : AppColors.surface,
+                      : context.surfaceColor,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected
@@ -334,7 +334,7 @@ class _DartsVariantSelector extends StatelessWidget {
                       style: TextStyle(
                         color: isSelected
                             ? AppColors.primary
-                            : AppColors.textPrimary,
+                            : context.textColor,
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                       ),
@@ -365,7 +365,7 @@ class _RoundsSelector extends StatelessWidget {
   final int rounds;
   final void Function(int) onChanged;
 
-  const _RoundsSelector({required this.rounds, required this.onChanged});
+  _RoundsSelector({required this.rounds, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -374,17 +374,17 @@ class _RoundsSelector extends StatelessWidget {
       children: [
         IconButton(
           onPressed: rounds > 3 ? () => onChanged(rounds - 1) : null,
-          icon: const Icon(Icons.remove_circle_outline_rounded),
+          icon: Icon(Icons.remove_circle_outline_rounded),
           color: AppColors.primary,
           iconSize: 28,
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: 16),
         Column(
           children: [
             Text(
               '$rounds',
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: context.textColor,
                 fontSize: 32,
                 fontWeight: FontWeight.w900,
               ),
@@ -398,10 +398,10 @@ class _RoundsSelector extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: 16),
         IconButton(
           onPressed: rounds < 20 ? () => onChanged(rounds + 1) : null,
-          icon: const Icon(Icons.add_circle_outline_rounded),
+          icon: Icon(Icons.add_circle_outline_rounded),
           color: AppColors.primary,
           iconSize: 28,
         ),
@@ -417,30 +417,30 @@ class _RoundsSelector extends StatelessWidget {
 class _RulesCard extends StatelessWidget {
   final GameType gameType;
 
-  const _RulesCard({required this.gameType});
+  _RulesCard({required this.gameType});
 
   @override
   Widget build(BuildContext context) {
     final rules = _rulesFor(gameType);
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: rules
             .map((r) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: EdgeInsets.only(bottom: 8),
                   child: Row(children: [
-                    Text(r.$1, style: const TextStyle(fontSize: 16)),
-                    const SizedBox(width: 8),
+                    Text(r.$1, style: TextStyle(fontSize: 16)),
+                    SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         r.$2,
-                        style: const TextStyle(
-                            color: AppColors.textPrimary, fontSize: 13),
+                        style: TextStyle(
+                            color: context.textColor, fontSize: 13),
                       ),
                     ),
                   ]),

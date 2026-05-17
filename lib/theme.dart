@@ -1,16 +1,44 @@
 import 'package:flutter/material.dart';
 
+// ─── Palette de base (dark, couleurs fixes cross-thème) ──────────────────────
+
 class AppColors {
   AppColors._();
-  static const Color background = Color(0xFF060E1E);
+
+  // Couleurs fixes (même en clair et sombre)
   static const Color primary = Color(0xFF1B68E8);
   static const Color accent = Color(0xFF00C8FF);
   static const Color success = Color(0xFF00E5A0);
+  static const Color error = Color(0xFFFF4757);
   static const Color textSecondary = Color(0xFF8895B3);
+
+  // Palette sombre
+  static const Color background = Color(0xFF060E1E);
   static const Color surface = Color(0xFF0D1B33);
   static const Color textPrimary = Color(0xFFF0F6FF);
-  static const Color error = Color(0xFFFF4757);
+
+  // Palette claire
+  static const Color lightBackground = Color(0xFFF0F6FF);
+  static const Color lightSurface = Color(0xFFFFFFFF);
+  static const Color lightTextPrimary = Color(0xFF060E1E);
 }
+
+// ─── Extension BuildContext : couleurs adaptées au thème actif ────────────────
+
+extension AppThemeX on BuildContext {
+  bool get _isDark => Theme.of(this).brightness == Brightness.dark;
+
+  Color get bgColor =>
+      _isDark ? AppColors.background : AppColors.lightBackground;
+
+  Color get surfaceColor =>
+      _isDark ? AppColors.surface : AppColors.lightSurface;
+
+  Color get textColor =>
+      _isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+}
+
+// ─── Thème sombre ─────────────────────────────────────────────────────────────
 
 ThemeData buildDarkTheme() {
   return ThemeData(
@@ -96,13 +124,38 @@ ThemeData buildDarkTheme() {
   );
 }
 
+// ─── Thème clair ──────────────────────────────────────────────────────────────
+
 ThemeData buildLightTheme() {
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      brightness: Brightness.light,
+    scaffoldBackgroundColor: AppColors.lightBackground,
+    colorScheme: const ColorScheme.light(
+      surface: AppColors.lightSurface,
+      primary: AppColors.primary,
+      secondary: AppColors.accent,
+      error: AppColors.error,
+      onSurface: AppColors.lightTextPrimary,
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: AppColors.lightSurface,
+      indicatorColor: AppColors.primary.withValues(alpha: 0.15),
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const IconThemeData(color: AppColors.primary, size: 24);
+        }
+        return const IconThemeData(color: AppColors.textSecondary, size: 24);
+      }),
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const TextStyle(
+              color: AppColors.primary,
+              fontSize: 12,
+              fontWeight: FontWeight.w600);
+        }
+        return const TextStyle(color: AppColors.textSecondary, fontSize: 12);
+      }),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -113,16 +166,41 @@ ThemeData buildLightTheme() {
         textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
       ),
     ),
-    appBarTheme: const AppBarTheme(
-      elevation: 0,
-      centerTitle: true,
-      titleTextStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: AppColors.lightSurface,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.textSecondary),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.textSecondary),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+      ),
+      labelStyle: const TextStyle(color: AppColors.textSecondary),
+      hintStyle: const TextStyle(color: AppColors.textSecondary),
     ),
     cardTheme: CardThemeData(
+      color: AppColors.lightSurface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 0,
     ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.lightSurface,
+      foregroundColor: AppColors.lightTextPrimary,
+      elevation: 0,
+      centerTitle: true,
+      titleTextStyle: TextStyle(
+          color: AppColors.lightTextPrimary,
+          fontSize: 18,
+          fontWeight: FontWeight.w700),
+    ),
     dialogTheme: DialogThemeData(
+      backgroundColor: AppColors.lightSurface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),
   );

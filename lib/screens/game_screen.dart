@@ -1,13 +1,10 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../config/ad_config.dart';
+import '../widgets/banner_ad_widget.dart';
 import '../models/count_mode.dart';
 import '../models/game_config.dart';
 import '../models/match_record.dart';
@@ -33,7 +30,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     if (config == null) {
       WidgetsBinding.instance
           .addPostFrameCallback((_) => context.go('/home'));
-      return const Scaffold(backgroundColor: AppColors.background);
+      return Scaffold(backgroundColor: context.bgColor);
     }
 
     ref.listen<ScoreState>(scoreProvider, (prev, next) {
@@ -54,7 +51,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         if (!didPop) await _tryAbandon();
       },
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.bgColor,
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.close),
@@ -123,7 +120,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 ),
               ),
             // Bannière pub uniquement pour les utilisateurs gratuits
-            if (!isPro) const _BannerAdWidget(),
+            if (!isPro) const BannerAdWidget(),
           ],
         ),
       ),
@@ -178,39 +175,39 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(winner != null ? '🏆' : '🤝',
-                style: const TextStyle(fontSize: 56),
+                style: TextStyle(fontSize: 56),
                 textAlign: TextAlign.center),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text(
               winner != null ? 'Victoire !' : 'Match nul !',
-              style: const TextStyle(
-                  color: AppColors.textPrimary,
+              style: TextStyle(
+                  color: context.textColor,
                   fontSize: 26,
                   fontWeight: FontWeight.w900),
               textAlign: TextAlign.center,
             ),
             if (winner != null) ...[
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 winner,
-                style: const TextStyle(
+                style: TextStyle(
                     color: AppColors.success,
                     fontSize: 20,
                     fontWeight: FontWeight.w700),
                 textAlign: TextAlign.center,
               ),
             ],
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.background,
+                color: context.bgColor,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 score.scores.join('  —  '),
-                style: const TextStyle(
-                    color: AppColors.textPrimary,
+                style: TextStyle(
+                    color: context.textColor,
                     fontSize: 32,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 2),
@@ -226,7 +223,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               Navigator.pop(ctx);
               context.go('/home');
             },
-            child: const Text('Retour à l\'accueil'),
+            child: Text('Retour à l\'accueil'),
           ),
         ],
       ),
@@ -237,8 +234,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Abandonner ?',
-            style: TextStyle(color: AppColors.textPrimary)),
+        title: Text('Abandonner ?',
+            style: TextStyle(color: context.textColor)),
         content: const Text(
           'La partie en cours ne sera pas sauvegardée.',
           style: TextStyle(color: AppColors.textSecondary),
@@ -262,63 +259,6 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 }
 
 // ─── Bannière AdMob (auto-gérée, sans espace si non chargée) ──────────────────
-
-class _BannerAdWidget extends StatefulWidget {
-  const _BannerAdWidget();
-
-  @override
-  State<_BannerAdWidget> createState() => _BannerAdWidgetState();
-}
-
-class _BannerAdWidgetState extends State<_BannerAdWidget> {
-  BannerAd? _ad;
-  bool _loaded = false;
-
-  static bool get _supported =>
-      !kIsWeb && (Platform.isAndroid || Platform.isIOS);
-
-  @override
-  void initState() {
-    super.initState();
-    if (_supported) _loadAd();
-  }
-
-  void _loadAd() {
-    _ad = BannerAd(
-      adUnitId: AdConfig.bannerAdUnitId,
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (_) {
-          if (mounted) setState(() => _loaded = true);
-        },
-        onAdFailedToLoad: (ad, _) {
-          ad.dispose();
-          _ad = null;
-        },
-      ),
-    )..load();
-  }
-
-  @override
-  void dispose() {
-    _ad?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_supported || !_loaded || _ad == null) return const SizedBox.shrink();
-    return SafeArea(
-      top: false,
-      child: SizedBox(
-        width: _ad!.size.width.toDouble(),
-        height: _ad!.size.height.toDouble(),
-        child: AdWidget(ad: _ad!),
-      ),
-    );
-  }
-}
 
 // ─── Layout 2 équipes (côte à côte) ───────────────────────────────────────────
 
@@ -363,8 +303,8 @@ class _TwoTeamLayout extends StatelessWidget {
           1,
           Container(
             width: 1,
-            margin: const EdgeInsets.symmetric(vertical: 40),
-            color: AppColors.surface,
+            margin: EdgeInsets.symmetric(vertical: 40),
+            color: context.surfaceColor,
           ),
         ),
     );
@@ -541,7 +481,7 @@ class _TeamRow extends StatelessWidget {
   final void Function(int) onSetScore;
   final VoidCallback onEditScore;
 
-  const _TeamRow({
+  _TeamRow({
     required this.teamName,
     required this.score,
     required this.color,
@@ -558,11 +498,11 @@ class _TeamRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedOpacity(
       opacity: isLoser ? 0.45 : 1.0,
-      duration: const Duration(milliseconds: 400),
+      duration: Duration(milliseconds: 400),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.surfaceColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isWinner ? AppColors.success : color.withValues(alpha: 0.3),
@@ -575,7 +515,7 @@ class _TeamRow extends StatelessWidget {
             Row(
               children: [
                 if (isWinner)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.only(right: 8),
                     child: Text('🏆', style: TextStyle(fontSize: 20)),
                   ),
@@ -583,7 +523,7 @@ class _TeamRow extends StatelessWidget {
                   child: Text(
                     teamName,
                     style: TextStyle(
-                      color: isWinner ? AppColors.success : AppColors.textPrimary,
+                      color: isWinner ? AppColors.success : context.textColor,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -808,16 +748,16 @@ class _ScoreInputFieldState extends State<_ScoreInputField> {
             controller: _ctrl,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            style: const TextStyle(
-                color: AppColors.textPrimary,
+            style: TextStyle(
+                color: context.textColor,
                 fontWeight: FontWeight.w700,
                 fontSize: 16),
             textAlign: TextAlign.center,
             decoration: InputDecoration(
               hintText: '0',
-              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+              contentPadding: EdgeInsets.symmetric(vertical: 10),
               filled: true,
-              fillColor: AppColors.surface,
+              fillColor: context.surfaceColor,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide:
@@ -841,12 +781,12 @@ class _ScoreInputFieldState extends State<_ScoreInputField> {
           onTap: _confirm,
           child: Container(
             height: 44,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               color: widget.color,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Center(
+            child: Center(
               child: Text('OK',
                   style: TextStyle(
                       color: Colors.white,
@@ -870,7 +810,7 @@ void showScoreInputDialog(
     builder: (ctx) => AlertDialog(
       title: Text(
         teamName,
-        style: const TextStyle(color: AppColors.textPrimary),
+        style: TextStyle(color: context.textColor),
         textAlign: TextAlign.center,
       ),
       content: TextField(
@@ -878,8 +818,8 @@ void showScoreInputDialog(
         autofocus: true,
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        style: const TextStyle(
-            color: AppColors.textPrimary,
+        style: TextStyle(
+            color: context.textColor,
             fontSize: 32,
             fontWeight: FontWeight.w900),
         textAlign: TextAlign.center,

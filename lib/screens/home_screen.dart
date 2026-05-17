@@ -13,24 +13,24 @@ class HomeScreen extends ConsumerWidget {
     final isPro = ref.watch(proProvider).isPro;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.bgColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+              padding: EdgeInsets.fromLTRB(24, 32, 24, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   RichText(
-                    text: const TextSpan(children: [
+                    text: TextSpan(children: [
                       TextSpan(
                         text: 'Score',
                         style: TextStyle(
                             fontSize: 42,
                             fontWeight: FontWeight.w900,
-                            color: AppColors.textPrimary,
+                            color: context.textColor,
                             letterSpacing: -1),
                       ),
                       TextSpan(
@@ -98,30 +98,30 @@ class HomeScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(
+        title: Text(
           '🔒 Fonctionnalité Pro',
-          style: TextStyle(color: AppColors.textPrimary, fontSize: 20),
+          style: TextStyle(color: context.textColor, fontSize: 20),
           textAlign: TextAlign.center,
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Créez des jeux avec un nom libre,\nde 2 à 4 équipes et vos propres règles.',
               style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Container(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
                 border:
                     Border.all(color: AppColors.primary.withValues(alpha: 0.4)),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text('⭐', style: TextStyle(fontSize: 24)),
@@ -132,7 +132,7 @@ class HomeScreen extends ConsumerWidget {
                       Text(
                         'ScoreTrack Pro',
                         style: TextStyle(
-                            color: AppColors.textPrimary,
+                            color: context.textColor,
                             fontWeight: FontWeight.w800,
                             fontSize: 16),
                       ),
@@ -162,9 +162,9 @@ class HomeScreen extends ConsumerWidget {
               context.push('/pro');
             },
             style: ElevatedButton.styleFrom(
-              minimumSize: const Size(140, 48),
+              minimumSize: Size(140, 48),
             ),
-            child: const Text('Acheter'),
+            child: Text('Acheter'),
           ),
         ],
       ),
@@ -177,7 +177,7 @@ class _GameCard extends StatelessWidget {
   final bool locked;
   final VoidCallback onTap;
 
-  const _GameCard({
+  _GameCard({
     required this.game,
     required this.locked,
     required this.onTap,
@@ -189,7 +189,7 @@ class _GameCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.surfaceColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: locked
@@ -203,28 +203,28 @@ class _GameCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _GameIcon(game: game),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: EdgeInsets.symmetric(horizontal: 8),
                   child: Text(
                     game.label,
                     style: TextStyle(
                       color: locked
                           ? AppColors.textSecondary
-                          : AppColors.textPrimary,
+                          : context.textColor,
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  padding: EdgeInsets.symmetric(horizontal: 6),
                   child: Text(
                     // Utilise le subtitle défini dans GameType
                     game.subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 10,
                     ),
@@ -240,9 +240,9 @@ class _GameCard extends StatelessWidget {
                 top: 10,
                 right: 10,
                 child: Container(
-                  padding: const EdgeInsets.all(4),
+                  padding: EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppColors.background,
+                    color: context.bgColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Text('🔒',

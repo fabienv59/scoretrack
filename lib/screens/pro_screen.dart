@@ -25,7 +25,7 @@ class ProScreen extends ConsumerWidget {
       }
       if (!prev!.isPro && next.isPro) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Bienvenue dans ScoreTrack Pro ! 🎉'),
             backgroundColor: AppColors.success,
             duration: Duration(seconds: 3),
@@ -35,16 +35,16 @@ class ProScreen extends ConsumerWidget {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.bgColor,
       appBar: AppBar(title: const Text('ScoreTrack Pro')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+        padding: EdgeInsets.fromLTRB(24, 16, 24, 40),
         child: Column(
           children: [
             // Header
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+              padding: EdgeInsets.symmetric(vertical: 32, horizontal: 24),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -59,12 +59,12 @@ class ProScreen extends ConsumerWidget {
               ),
               child: Column(
                 children: [
-                  const Text('⭐', style: TextStyle(fontSize: 56)),
-                  const SizedBox(height: 12),
-                  const Text(
+                  Text('⭐', style: TextStyle(fontSize: 56)),
+                  SizedBox(height: 12),
+                  Text(
                     'ScoreTrack Pro',
                     style: TextStyle(
-                      color: AppColors.textPrimary,
+                      color: context.textColor,
                       fontSize: 28,
                       fontWeight: FontWeight.w900,
                       letterSpacing: -0.5,
@@ -191,7 +191,7 @@ class _FeatureRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -203,18 +203,18 @@ class _FeatureRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
-              child: Text(icon, style: const TextStyle(fontSize: 22)),
+              child: Text(icon, style: TextStyle(fontSize: 22)),
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: context.textColor,
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),

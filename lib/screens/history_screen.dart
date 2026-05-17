@@ -1,35 +1,173 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:csv/csv.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/game_type.dart';
 import '../models/match_record.dart';
 import '../providers/history_provider.dart';
 import '../providers/pro_provider.dart';
+import '../services/database_service.dart';
 import '../theme.dart';
 
-class HistoryScreen extends ConsumerWidget {
+class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends ConsumerState<HistoryScreen> {
+  bool _busy = false;
+
+  // ─── Export CSV ──────────────────────────────────────────────────────────────
+
+  Future<void> _exportCsv() async {
+    if (!ref.read(proProvider).isPro) {
+      context.push('/pro');
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      final matches = await DatabaseService.instance.getAllMatches();
+      final rows = <List<dynamic>>[
+        ['Date', 'Jeu', 'Équipe1', 'Score1', 'Équipe2', 'Score2', 'Vainqueur'],
+        ...matches.map((m) => [
+              _formatIso(m.playedAt),
+              GameType.fromId(m.gameTypeId).label,
+              m.team1Name,
+              m.score1,
+              m.team2Name,
+              m.score2,
+              m.winner ?? 'Match nul',
+            ]),
+      ];
+      final csv = const ListToCsvConverter().convert(rows);
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/scoretrack_export.csv');
+      await file.writeAsString(csv);
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'Historique ScoreTrack',
+      );
+    } catch (e) {
+      if (mounted) _showError('Erreur export CSV : $e');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  // ─── Export JSON ─────────────────────────────────────────────────────────────
+
+  Future<void> _exportJson() async {
+    if (!ref.read(proProvider).isPro) {
+      context.push('/pro');
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      final matches = await DatabaseService.instance.getAllMatches();
+      final data = matches.map((m) => m.toMap()).toList();
+      final json = const JsonEncoder.withIndent('  ').convert(data);
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/scoretrack_export.json');
+      await file.writeAsString(json);
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'Historique ScoreTrack',
+      );
+    } catch (e) {
+      if (mounted) _showError('Erreur export JSON : $e');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  // ─── Import JSON ─────────────────────────────────────────────────────────────
+
+  Future<void> _importJson() async {
+    if (!ref.read(proProvider).isPro) {
+      context.push('/pro');
+      return;
+    }
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+    );
+    if (result == null || result.files.single.path == null) return;
+
+    setState(() => _busy = true);
+    try {
+      final content = await File(result.files.single.path!).readAsString();
+      final list = jsonDecode(content) as List<dynamic>;
+      int count = 0;
+      for (final item in list) {
+        final map = item as Map<String, dynamic>;
+        final r = MatchRecord.fromMap(map);
+        // Strip id → DB autoincrement, ignore duplicates via importMatch
+        final inserted = await DatabaseService.instance.importMatch(
+          MatchRecord(
+            gameTypeId: r.gameTypeId,
+            team1Name: r.team1Name,
+            team2Name: r.team2Name,
+            score1: r.score1,
+            score2: r.score2,
+            playedAt: r.playedAt,
+            winnerName: r.winnerName,
+          ),
+        );
+        if (inserted > 0) count++;
+      }
+      ref.invalidate(historyProvider);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              '$count partie${count > 1 ? "s" : ""} importée${count > 1 ? "s" : ""} avec succès'),
+          backgroundColor: AppColors.success,
+        ));
+      }
+    } catch (e) {
+      if (mounted) _showError('Erreur import : $e');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+    );
+  }
+
+  String _formatIso(DateTime dt) =>
+      dt.toIso8601String().substring(0, 16).replaceFirst('T', ' ');
+
+  // ─── Build ───────────────────────────────────────────────────────────────────
+
+  @override
+  Widget build(BuildContext context) {
     final historyAsync = ref.watch(historyProvider);
     final isPro = ref.watch(proProvider).isPro;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.bgColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+              padding: EdgeInsets.fromLTRB(24, 32, 24, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Historique',
                     style: TextStyle(
-                        color: AppColors.textPrimary,
+                        color: context.textColor,
                         fontSize: 34,
                         fontWeight: FontWeight.w900,
                         letterSpacing: -0.5),
@@ -46,7 +184,6 @@ class HistoryScreen extends ConsumerWidget {
               ),
             ),
 
-            // Bannière limite (free uniquement)
             if (!isPro)
               Padding(
                 padding:
@@ -83,12 +220,10 @@ class HistoryScreen extends ConsumerWidget {
                 ),
               ),
 
-            // Liste des parties
             Expanded(
               child: historyAsync.when(
                 loading: () => const Center(
-                  child:
-                      CircularProgressIndicator(color: AppColors.primary),
+                  child: CircularProgressIndicator(color: AppColors.primary),
                 ),
                 error: (err, _) => Center(
                   child: Text('Erreur: $err',
@@ -105,15 +240,13 @@ class HistoryScreen extends ConsumerWidget {
                           Text(
                             'Aucune partie pour l\'instant',
                             style: TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 16),
+                                color: AppColors.textSecondary, fontSize: 16),
                           ),
                           SizedBox(height: 8),
                           Text(
                             'Lancez votre première partie !',
                             style: TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 13),
+                                color: AppColors.textSecondary, fontSize: 13),
                           ),
                         ],
                       ),
@@ -122,19 +255,57 @@ class HistoryScreen extends ConsumerWidget {
                   return ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: matches.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: 10),
-                    itemBuilder: (ctx, i) =>
-                        _MatchCard(match: matches[i]),
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (ctx, i) => _MatchCard(match: matches[i]),
                   );
                 },
               ),
             ),
 
-            // Boutons export
+            // Boutons export / import
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              child: _ExportButtons(isPro: isPro),
+              child: _busy
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: CircularProgressIndicator(
+                            color: AppColors.primary),
+                      ),
+                    )
+                  : Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _ActionButton(
+                                label: 'Export CSV',
+                                icon: Icons.table_chart_outlined,
+                                locked: !isPro,
+                                onTap: _exportCsv,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _ActionButton(
+                                label: 'Export JSON',
+                                icon: Icons.code_rounded,
+                                locked: !isPro,
+                                onTap: _exportJson,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        _ActionButton(
+                          label: 'Importer des données',
+                          icon: Icons.upload_file_rounded,
+                          locked: !isPro,
+                          onTap: _importJson,
+                          fullWidth: true,
+                        ),
+                      ],
+                    ),
             ),
           ],
         ),
@@ -143,74 +314,32 @@ class HistoryScreen extends ConsumerWidget {
   }
 }
 
-// ─── Boutons Export ────────────────────────────────────────────────────────────
+// ─── Bouton action (export / import) ─────────────────────────────────────────
 
-class _ExportButtons extends StatelessWidget {
-  final bool isPro;
-
-  const _ExportButtons({required this.isPro});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _ExportButton(
-            label: 'Export CSV',
-            icon: Icons.table_chart_outlined,
-            locked: !isPro,
-            onTap: isPro
-                ? () => _showExportSnack(context, 'CSV')
-                : () => context.push('/pro'),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _ExportButton(
-            label: 'Export JSON',
-            icon: Icons.code_rounded,
-            locked: !isPro,
-            onTap: isPro
-                ? () => _showExportSnack(context, 'JSON')
-                : () => context.push('/pro'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showExportSnack(BuildContext context, String format) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Export $format — fonctionnalité à venir !'),
-        backgroundColor: AppColors.primary,
-      ),
-    );
-  }
-}
-
-class _ExportButton extends StatelessWidget {
+class _ActionButton extends StatelessWidget {
   final String label;
   final IconData icon;
   final bool locked;
   final VoidCallback onTap;
+  final bool fullWidth;
 
-  const _ExportButton({
+  _ActionButton({
     required this.label,
     required this.icon,
     required this.locked,
     required this.onTap,
+    this.fullWidth = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    Widget child = GestureDetector(
       onTap: onTap,
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        width: fullWidth ? double.infinity : null,
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.surfaceColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: locked
@@ -224,17 +353,13 @@ class _ExportButton extends StatelessWidget {
             Icon(
               locked ? Icons.lock_outline_rounded : icon,
               size: 16,
-              color: locked
-                  ? AppColors.textSecondary
-                  : AppColors.accent,
+              color: locked ? AppColors.textSecondary : AppColors.accent,
             ),
-            const SizedBox(width: 6),
+            SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
-                color: locked
-                    ? AppColors.textSecondary
-                    : AppColors.textPrimary,
+                color: locked ? AppColors.textSecondary : context.textColor,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -243,15 +368,16 @@ class _ExportButton extends StatelessWidget {
         ),
       ),
     );
+    return child;
   }
 }
 
-// ─── Carte de partie ───────────────────────────────────────────────────────────
+// ─── Carte de partie ──────────────────────────────────────────────────────────
 
 class _MatchCard extends StatelessWidget {
   final MatchRecord match;
 
-  const _MatchCard({required this.match});
+  _MatchCard({required this.match});
 
   @override
   Widget build(BuildContext context) {
@@ -259,9 +385,9 @@ class _MatchCard extends StatelessWidget {
     final winner = match.winner;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
       ),
@@ -272,25 +398,24 @@ class _MatchCard extends StatelessWidget {
               if (game.assetImage != null)
                 Image.asset(game.assetImage!, width: 32, height: 32)
               else
-                Text(game.emoji,
-                    style: const TextStyle(fontSize: 18)),
-              const SizedBox(width: 8),
+                Text(game.emoji, style: TextStyle(fontSize: 18)),
+              SizedBox(width: 8),
               Text(
                 game.label,
-                style: const TextStyle(
-                    color: AppColors.textPrimary,
+                style: TextStyle(
+                    color: context.textColor,
                     fontWeight: FontWeight.w600,
                     fontSize: 14),
               ),
-              const Spacer(),
+              Spacer(),
               Text(
                 _formatDate(match.playedAt),
-                style: const TextStyle(
+                style: TextStyle(
                     color: AppColors.textSecondary, fontSize: 11),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           Row(
             children: [
               Expanded(
@@ -299,7 +424,7 @@ class _MatchCard extends StatelessWidget {
                   style: TextStyle(
                     color: winner == match.team1Name
                         ? AppColors.success
-                        : AppColors.textPrimary,
+                        : context.textColor,
                     fontWeight: winner == match.team1Name
                         ? FontWeight.w800
                         : FontWeight.normal,
@@ -311,16 +436,16 @@ class _MatchCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 6),
+                padding:
+                    EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.background,
+                  color: context.bgColor,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   '${match.score1}  —  ${match.score2}',
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: context.textColor,
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1,
@@ -333,7 +458,7 @@ class _MatchCard extends StatelessWidget {
                   style: TextStyle(
                     color: winner == match.team2Name
                         ? AppColors.success
-                        : AppColors.textPrimary,
+                        : context.textColor,
                     fontWeight: winner == match.team2Name
                         ? FontWeight.w800
                         : FontWeight.normal,

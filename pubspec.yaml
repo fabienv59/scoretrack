@@ -2,7 +2,7 @@ name: scoretrack
 description: "Compteur de scores universel pour jeux 1vs1 - VanByte"
 publish_to: 'none'
 
-version: 1.2.0+6
+version: 1.2.0+8
 
 environment:
   sdk: ^3.5.0
@@ -20,6 +20,12 @@ dependencies:
   google_mobile_ads: ^5.1.0
   in_app_purchase: ^3.2.0
   in_app_review: ^2.0.9
+  confetti: ^0.7.0
+  share_plus: ^10.0.0
+  path_provider: ^2.1.4
+  csv: ^6.0.0
+  file_picker: ^8.0.0
+  package_info_plus: ^8.0.0
 
 dev_dependencies:
   flutter_test:

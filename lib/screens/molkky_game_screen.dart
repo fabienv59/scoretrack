@@ -1,12 +1,9 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../config/ad_config.dart';
+import '../widgets/banner_ad_widget.dart';
 import '../models/game_type.dart';
 import '../models/match_record.dart';
 import '../providers/game_config_provider.dart';
@@ -70,7 +67,7 @@ class _MolkkyGameScreenState extends ConsumerState<MolkkyGameScreen> {
         if (!didPop) await _tryAbandon();
       },
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.bgColor,
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.close),
@@ -94,7 +91,7 @@ class _MolkkyGameScreenState extends ConsumerState<MolkkyGameScreen> {
                   : null,
             ),
             IconButton(
-              icon: const Icon(Icons.help_outline_rounded),
+              icon: Icon(Icons.help_outline_rounded),
               tooltip: 'Règles du Mölkky',
               onPressed: _showRules,
             ),
@@ -114,8 +111,8 @@ class _MolkkyGameScreenState extends ConsumerState<MolkkyGameScreen> {
                   ),
                   Container(
                     width: 1,
-                    margin: const EdgeInsets.symmetric(vertical: 32),
-                    color: AppColors.surface,
+                    margin: EdgeInsets.symmetric(vertical: 32),
+                    color: context.surfaceColor,
                   ),
                   _TeamPanel(
                     team: state.teams[1],
@@ -150,7 +147,7 @@ class _MolkkyGameScreenState extends ConsumerState<MolkkyGameScreen> {
             ],
 
             // Bannière pub pour les utilisateurs gratuits
-            if (!isPro) const _BannerAdWidget(),
+            if (!isPro) const BannerAdWidget(),
           ],
         ),
       ),
@@ -208,26 +205,26 @@ class _MolkkyGameScreenState extends ConsumerState<MolkkyGameScreen> {
           children: [
             Text(
               winnerName != null ? '🏆' : '🤝',
-              style: const TextStyle(fontSize: 56),
+              style: TextStyle(fontSize: 56),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text(
               winnerName != null
                   ? (isElim ? 'Élimination !' : 'Victoire !')
                   : 'Match nul !',
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: context.textColor,
                 fontSize: 26,
                 fontWeight: FontWeight.w900,
               ),
               textAlign: TextAlign.center,
             ),
             if (winnerName != null) ...[
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 winnerName,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.success,
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -235,7 +232,7 @@ class _MolkkyGameScreenState extends ConsumerState<MolkkyGameScreen> {
                 textAlign: TextAlign.center,
               ),
               if (isElim)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(top: 4),
                   child: Text(
                     '3 ratés consécutifs',
@@ -244,18 +241,18 @@ class _MolkkyGameScreenState extends ConsumerState<MolkkyGameScreen> {
                   ),
                 ),
             ],
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             Container(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.background,
+                color: context.bgColor,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 '${state.teams[0].score}  —  ${state.teams[1].score}',
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  color: context.textColor,
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 2,
@@ -277,7 +274,7 @@ class _MolkkyGameScreenState extends ConsumerState<MolkkyGameScreen> {
               }
               setState(() => _throwMode = null);
             },
-            child: const Text(
+            child: Text(
               'Rejouer',
               style: TextStyle(color: AppColors.accent),
             ),
@@ -287,7 +284,7 @@ class _MolkkyGameScreenState extends ConsumerState<MolkkyGameScreen> {
               Navigator.pop(ctx);
               context.go('/home');
             },
-            child: const Text("Retour à l'accueil"),
+            child: Text("Retour à l'accueil"),
           ),
         ],
       ),
@@ -300,9 +297,9 @@ class _MolkkyGameScreenState extends ConsumerState<MolkkyGameScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(
+        title: Text(
           '🪵  Règles du Mölkky',
-          style: TextStyle(color: AppColors.textPrimary),
+          style: TextStyle(color: context.textColor),
           textAlign: TextAlign.center,
         ),
         content: const Column(
@@ -335,8 +332,8 @@ class _MolkkyGameScreenState extends ConsumerState<MolkkyGameScreen> {
         actions: [
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx),
-            style: ElevatedButton.styleFrom(minimumSize: const Size(120, 44)),
-            child: const Text('Compris'),
+            style: ElevatedButton.styleFrom(minimumSize: Size(120, 44)),
+            child: Text('Compris'),
           ),
         ],
       ),
@@ -349,8 +346,8 @@ class _MolkkyGameScreenState extends ConsumerState<MolkkyGameScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Abandonner ?',
-            style: TextStyle(color: AppColors.textPrimary)),
+        title: Text('Abandonner ?',
+            style: TextStyle(color: context.textColor)),
         content: const Text(
           'La partie en cours ne sera pas sauvegardée.',
           style: TextStyle(color: AppColors.textSecondary),
@@ -423,7 +420,7 @@ class _TeamPanel extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: 6),
 
               // Score
               FittedBox(
@@ -440,16 +437,16 @@ class _TeamPanel extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: 6),
 
               // Barre de progression vers 50
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
+                padding: EdgeInsets.symmetric(horizontal: 4),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(5),
                   child: LinearProgressIndicator(
                     value: (team.score / kMolkkyTarget).clamp(0.0, 1.0),
-                    backgroundColor: AppColors.surface,
+                    backgroundColor: context.surfaceColor,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       team.score == kMolkkyTarget
                           ? AppColors.success
@@ -542,15 +539,15 @@ class _TurnIndicator extends StatelessWidget {
   final String teamName;
   final Color color;
 
-  const _TurnIndicator({required this.teamName, required this.color});
+  _TurnIndicator({required this.teamName, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+      margin: EdgeInsets.fromLTRB(16, 4, 16, 4),
+      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 7),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
@@ -582,7 +579,7 @@ class _ThrowInput extends StatelessWidget {
   final VoidCallback onMiss;
   final void Function(int) onThrow;
 
-  const _ThrowInput({
+  _ThrowInput({
     required this.selectedMode,
     required this.onModeSelected,
     required this.onMiss,
@@ -592,9 +589,9 @@ class _ThrowInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+      padding: EdgeInsets.fromLTRB(12, 8, 12, 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.surfaceColor,
         border: Border(
           top: BorderSide(color: AppColors.primary.withValues(alpha: 0.18)),
         ),
@@ -691,7 +688,7 @@ class _ModeToggleButton extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
 
-  const _ModeToggleButton({
+  _ModeToggleButton({
     required this.label,
     required this.icon,
     required this.selected,
@@ -704,10 +701,10 @@ class _ModeToggleButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(vertical: 11),
+        duration: Duration(milliseconds: 150),
+        padding: EdgeInsets.symmetric(vertical: 11),
         decoration: BoxDecoration(
-          color: selected ? color.withValues(alpha: 0.18) : AppColors.background,
+          color: selected ? color.withValues(alpha: 0.18) : context.bgColor,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: selected ? color : color.withValues(alpha: 0.3),
@@ -793,17 +790,17 @@ class _RuleItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: EdgeInsets.symmetric(vertical: 5),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(icon, style: const TextStyle(fontSize: 16)),
-          const SizedBox(width: 10),
+          Text(icon, style: TextStyle(fontSize: 16)),
+          SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: context.textColor,
                 fontSize: 13,
                 height: 1.45,
               ),
@@ -817,59 +814,3 @@ class _RuleItem extends StatelessWidget {
 
 // ─── Bannière AdMob (copie locale, gestion plateforme intégrée) ───────────────
 
-class _BannerAdWidget extends StatefulWidget {
-  const _BannerAdWidget();
-
-  @override
-  State<_BannerAdWidget> createState() => _BannerAdWidgetState();
-}
-
-class _BannerAdWidgetState extends State<_BannerAdWidget> {
-  BannerAd? _ad;
-  bool _loaded = false;
-
-  static bool get _supported =>
-      !kIsWeb && (Platform.isAndroid || Platform.isIOS);
-
-  @override
-  void initState() {
-    super.initState();
-    if (_supported) _loadAd();
-  }
-
-  void _loadAd() {
-    _ad = BannerAd(
-      adUnitId: AdConfig.bannerAdUnitId,
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (_) {
-          if (mounted) setState(() => _loaded = true);
-        },
-        onAdFailedToLoad: (ad, _) {
-          ad.dispose();
-          _ad = null;
-        },
-      ),
-    )..load();
-  }
-
-  @override
-  void dispose() {
-    _ad?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_supported || !_loaded || _ad == null) return const SizedBox.shrink();
-    return SafeArea(
-      top: false,
-      child: SizedBox(
-        width: _ad!.size.width.toDouble(),
-        height: _ad!.size.height.toDouble(),
-        child: AdWidget(ad: _ad!),
-      ),
-    );
-  }
-}
